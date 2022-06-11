@@ -48,7 +48,8 @@ class App extends React.Component {
   ];
 
   state = {
-    query: ""
+    query: "",
+    showStocked: false
   };
 
   handleInput = (input) => {
@@ -58,7 +59,15 @@ class App extends React.Component {
 
   filteredProducts = () => {
     const query = this.state.query;
-    return this.products.filter((product) => product.name.includes(query));
+    const showStocked = this.state.showStocked;
+
+    let filteredProducts = this.products.filter((product) =>
+      product.name.includes(query)
+    );
+    if (showStocked) {
+      filteredProducts = filteredProducts.filter((product) => product.stocked);
+    }
+    return filteredProducts;
   };
 
   render() {
@@ -66,7 +75,7 @@ class App extends React.Component {
       <div>
         <SearchBar
           query={this.state.query}
-          showStocked={false}
+          showStocked={this.state.showStocked}
           handleInput={this.handleInput}
         />
         <SearchResults products={this.filteredProducts()} />
@@ -80,9 +89,14 @@ const SearchBar = (props) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
     console.log(value);
-    handleInput({ [name]: value });
+
+    if ("query" === name) {
+      handleInput({ [name]: value });
+    } else {
+      console.log(event.target.checked);
+      handleInput({ showStocked: event.target.checked });
+    }
   };
 
   return (
@@ -95,6 +109,14 @@ const SearchBar = (props) => {
         value={query}
         onChange={handleChange}
       />
+      <input
+        type="checkbox"
+        name="showStocked"
+        id="showStocked"
+        defaultChecked={showStocked}
+        onChange={handleChange}
+      />
+      <label htmlFor="showStocked">Only show products in stock</label>
     </form>
   );
 };
@@ -123,10 +145,12 @@ const CategorizedProducts = (props) => {
 
   const rows = products.map((product, index) => {
     return (
-      <tr key={index}>
-        <td>{product.name}</td>
-        <td>{product.price}</td>
-      </tr>
+      <Product
+        key={index}
+        name={product.name}
+        price={product.price}
+        stocked={product.stocked}
+      />
     );
   });
 
@@ -141,12 +165,12 @@ const CategorizedProducts = (props) => {
 };
 
 const Product = (props) => {
-  const { name, price } = props;
+  const { name, price, stocked } = props;
 
   return (
-    <tr>
+    <tr className={stocked ? "stocked" : "not-stocked"}>
       <td> {name} </td>
-      <td> ${price} </td>
+      <td> {price} </td>
     </tr>
   );
 };

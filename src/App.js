@@ -53,7 +53,6 @@ class App extends React.Component {
   };
 
   handleInput = (input) => {
-    console.log(input);
     this.setState(input);
   };
 
@@ -89,12 +88,10 @@ const SearchBar = (props) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    console.log(value);
 
     if ("query" === name) {
       handleInput({ [name]: value });
     } else {
-      console.log(event.target.checked);
       handleInput({ showStocked: event.target.checked });
     }
   };
@@ -124,20 +121,24 @@ const SearchBar = (props) => {
 const SearchResults = (props) => {
   const { products } = props;
 
-  const groupByCategory = products.reduce((group, product) => {
-    const { category } = product;
-    group[category] = group[category] ?? [];
-    group[category].push(product);
-    return group;
-  }, {});
+  if (products.length === 0) {
+    return <div> No results </div>;
+  } else {
+    const groupByCategory = products.reduce((group, product) => {
+      const { category } = product;
+      group[category] = group[category] ?? [];
+      group[category].push(product);
+      return group;
+    }, {});
 
-  const categorizedProductsView = Object.entries(groupByCategory).map(
-    ([k, v]) => {
-      return <CategorizedProducts key={k} category={k} products={v} />;
-    }
-  );
+    const categorizedProductsView = Object.entries(groupByCategory).map(
+      ([k, v]) => {
+        return <CategorizedProducts key={k} category={k} products={v} />;
+      }
+    );
 
-  return <div> {categorizedProductsView} </div>;
+    return <div> {categorizedProductsView} </div>;
+  }
 };
 
 const CategorizedProducts = (props) => {
